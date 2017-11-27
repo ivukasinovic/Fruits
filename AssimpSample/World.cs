@@ -179,11 +179,11 @@ namespace AssimpSample
             
             gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
             gl.Enable(OpenGL.GL_DEPTH_TEST);
-            gl.Enable(OpenGL.GL_CULL_FACE);
+           // gl.Enable(OpenGL.GL_CULL_FACE);
             //gl.LoadIdentity();
             gl.Viewport(0, 0, m_width, m_height);
-
-            WriteText(gl);         
+            //WriteText(gl);
+            WriteText2(gl);
 
             gl.PushMatrix();
 
@@ -258,6 +258,7 @@ namespace AssimpSample
 
             
             //iscrtavanje podloge
+            
             gl.Color(0.5f, 0.5f, 0.5f);
             gl.Translate(0.0f, -480f, -1f);
             gl.Begin(OpenGL.GL_QUADS);
@@ -267,7 +268,7 @@ namespace AssimpSample
             gl.Vertex(-300f, 100f);
             gl.End();
 
-            gl.Color(0.7f, 0.0f, 0.0f);
+            gl.Color(0.0f, 0.0f, 0.7f);
 
             //dole zid
             gl.PushMatrix();
@@ -311,6 +312,57 @@ namespace AssimpSample
             gl.Flush();
         }
 
+        private void WriteText2(OpenGL gl)
+        {
+            gl.Viewport(0, m_width / 2, m_width / 2, m_height / 2);
+            gl.PushMatrix();
+            //gl.Translate(0.0f, -14.5f, 0.0f);
+            gl.MatrixMode(OpenGL.GL_PROJECTION);
+            gl.LoadIdentity();
+            gl.Ortho2D(-13.0f, 13.0f, -10.0f, 10.0f);
+
+            gl.MatrixMode(OpenGL.GL_MODELVIEW);
+
+            //poruka
+
+            gl.PushMatrix();
+            gl.Color(1.0f, 0f, 0.0f);
+            gl.Translate(1.5f, -4.0f, 0.0f);
+            //     gl.DrawText3D()
+            gl.PushMatrix();
+            gl.DrawText3D("Times New Roman Bold", 10f, 0.0f, 0.0f, "Predmet: Racunarska grafika");
+            gl.PopMatrix();
+            gl.PushMatrix();
+            gl.Translate(0f, -1.0f, 0.0f);
+            gl.DrawText3D("Times New Roman Bold", 10f, 0.0f, 0.0f, "Sk.god : 2017/18");
+            gl.PopMatrix();
+            gl.PushMatrix();
+            gl.Translate(0f, -2.0f, 0.0f);
+            gl.DrawText3D("Times New Roman Bold", 10f, 0.0f, 0.0f, "Ima: Ivan");
+            gl.PopMatrix();
+            gl.PushMatrix();
+            gl.Translate(0f, -3.0f, 0.0f);
+            gl.DrawText3D("Times New Roman Bold", 10f, 0.0f, 0.0f, "Prezime: Vukasinovic");
+            gl.PopMatrix();
+            gl.PushMatrix();
+            gl.Translate(0f, -4.0f, 0.0f);
+            gl.DrawText3D("Times New Roman Bold", 10f, 0.0f, 0.0f, "Sifra zad: 15.2");
+            gl.PopMatrix();
+
+
+            gl.PopMatrix();
+
+            gl.Viewport(0, 0, m_width, m_height);
+            gl.MatrixMode(OpenGL.GL_PROJECTION);
+            gl.LoadIdentity();
+           
+            gl.Perspective(45f, 1.0f, 1.0f, 20000f);
+            gl.MatrixMode(OpenGL.GL_MODELVIEW);
+
+            // gl.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            gl.PopMatrix();
+        }
+
         private void WriteText(OpenGL gl)
         {
             var yTranslate = 0.0f;
@@ -318,7 +370,7 @@ namespace AssimpSample
             gl.MatrixMode(OpenGL.GL_PROJECTION);
             gl.PushMatrix();
             gl.LoadIdentity();
-            gl.Ortho2D(-100f, 0f, -20f, 20f); //definise projekciju 2D
+            gl.Ortho2D(28,-28,20,-20); //definise projekciju 2D
 
             gl.MatrixMode(OpenGL.GL_MODELVIEW);
             gl.LoadIdentity();
