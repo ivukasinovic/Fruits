@@ -14,6 +14,8 @@ using SharpGL.SceneGraph.Primitives;
 using SharpGL.SceneGraph.Quadrics;
 using SharpGL.SceneGraph.Core;
 using SharpGL;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace AssimpSample
 {
@@ -26,11 +28,21 @@ namespace AssimpSample
     {
         #region Atributi
 
+        
+
         /// <summary>
         ///	 Scena koja se prikazuje.
         /// </summary>
         private AssimpScene m_scene;
         private AssimpScene m_scene2;
+        /// <summary>
+        ///	 Identifikatori OpenGL tekstura
+        /// </summary>
+        private uint[] m_textures = null;
+        /// <summary>
+        ///	 Putanje do slika koje se koriste za teksture
+        /// </summary>
+        private string[] m_textureFiles = { "..//..//images//brick.jpg", "..//..//images//parquet.jpg" };
 
         /// <summary>
         ///	 Ugao rotacije sveta oko X ose.
@@ -43,6 +55,7 @@ namespace AssimpSample
         private float m_yRotation = 0.0f;
 
         private float m_zRotation = 0.0f;
+        float[] positionReflector = { 0.0f, 2700.0f, 0.0f, 1.0f };
 
         /// <summary>
         ///	 Udaljenost scene od kamere.
@@ -140,6 +153,7 @@ namespace AssimpSample
             this.m_scene2 = new AssimpScene(scenePath, sceneFileName2, gl);
             this.m_width = width;
             this.m_height = height;
+            m_textures = new uint[2];
         }
 
         /// <summary>
@@ -165,10 +179,64 @@ namespace AssimpSample
             gl.ShadeModel(OpenGL.GL_FLAT);
             gl.Enable(OpenGL.GL_DEPTH_TEST);
             gl.Enable(OpenGL.GL_CULL_FACE);
+
+            gl.Enable(OpenGL.GL_COLOR_MATERIAL);
+            gl.ColorMaterial(OpenGL.GL_FRONT, OpenGL.GL_AMBIENT_AND_DIFFUSE);
+            gl.Enable(OpenGL.GL_NORMALIZE);
+
+            FormTexture(gl);
+
+            gl.Enable(OpenGL.GL_LIGHTING);
+            gl.Enable(OpenGL.GL_LIGHT0);
+            //gl.Enable(OpenGL.GL_LIGHT1);
+           
+
+
+
+            gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_WRAP_S, OpenGL.GL_REPEAT);
+            gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_WRAP_T, OpenGL.GL_REPEAT);
+
+
+
+            FormTexture(gl);
+            SetupLighting(gl);
+
+
             m_scene.LoadScene();
             m_scene.Initialize();
             m_scene2.LoadScene();
             m_scene2.Initialize();
+        }
+
+        private void FormTexture(OpenGL gl)
+        {
+            gl.Enable(OpenGL.GL_TEXTURE_2D);
+            gl.TexEnv(OpenGL.GL_TEXTURE_ENV, OpenGL.GL_TEXTURE_ENV_MODE, OpenGL.GL_MODULATE);
+            gl.GenTextures(2, m_textures);
+            for (int i = 0; i < 2; ++i)
+            {
+                // Pridruzi teksturu odgovarajucem identifikatoru
+                gl.BindTexture(OpenGL.GL_TEXTURE_2D, m_textures[i]);
+
+                // Ucitaj sliku i podesi parametre teksture
+                Bitmap image = new Bitmap(m_textureFiles[i]);
+                // rotiramo sliku zbog koordinantog sistema opengl-a
+                image.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                Rectangle rect = new Rectangle(0, 0, image.Width, image.Height);
+                // RGBA format (dozvoljena providnost slike tj. alfa kanal)
+                BitmapData imageData = image.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadOnly,
+                                                      PixelFormat.Format32bppArgb);
+
+                gl.Build2DMipmaps(OpenGL.GL_TEXTURE_2D, (int)OpenGL.GL_RGBA8, image.Width, image.Height, OpenGL.GL_BGRA, OpenGL.GL_UNSIGNED_BYTE, imageData.Scan0);
+                gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MIN_FILTER, OpenGL.GL_LINEAR);		// Linear Filtering
+                gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MAG_FILTER, OpenGL.GL_LINEAR);		// Linear Filtering
+
+                gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_WRAP_S, OpenGL.GL_REPEAT);
+                gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_WRAP_T, OpenGL.GL_REPEAT);
+
+                image.UnlockBits(imageData);
+                image.Dispose();
+            }
         }
 
         /// <summary>
@@ -179,10 +247,7 @@ namespace AssimpSample
             
             gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
             gl.Enable(OpenGL.GL_DEPTH_TEST);
-           // gl.Enable(OpenGL.GL_CULL_FACE);
-            //gl.LoadIdentity();
             gl.Viewport(0, 0, m_width, m_height);
-            //WriteText(gl);
             WriteText2(gl);
 
             gl.PushMatrix();
@@ -193,9 +258,6 @@ namespace AssimpSample
             gl.Rotate(m_yRotation, 0.0f, 1.0f, 0.0f);
             gl.Rotate(m_zRotation, 0.0f, 0.0f, 1.0f);
             gl.Translate(40f, 200f, 0.0f);
-           
-
-
 
             //iscrtavanje 1/2jabuke
             gl.PushMatrix();
@@ -204,33 +266,33 @@ namespace AssimpSample
             gl.Scale(20f, 20f, 20f);
             m_scene.Draw();
             gl.PopMatrix();
+
             //iscrtavanje 2/2jabuke
             gl.PushMatrix();
             gl.Rotate(90f, 180f, 0f);
             gl.Translate(-172f, -70f, -173f);
-            
             gl.Scale(20f, 20f, 20f);
             m_scene.Draw();
             gl.PopMatrix();
 
 
 
-            //iscrtavanje narandza
+            //iscrtavanje narandza gore
             gl.PushMatrix();
             gl.Rotate(180f, 0f, 0f);
             gl.Translate(-125f, 137f,-50f);
             gl.Scale(150f, 150f, 150f);
             m_scene2.Draw();
             gl.PopMatrix();
-            //iscrtavanje narandza
+            //iscrtavanje narandza dole
             gl.PushMatrix();
             gl.Rotate(0f, 0f, 0f);
-            gl.Translate(-125f, -255f, 12f);
+            gl.Translate(-125f, -258f, 12f);
             gl.Scale(150f, 150f, 150f);
             m_scene2.Draw();
             gl.PopMatrix();
 
-            //jabuka postolje
+            //postolja
             gl.PushMatrix();
             gl.Translate(-5.0f, -100.0f, 0.0f);
             gl.Color(0.0f, 0.7f, 0.0f);
@@ -240,7 +302,7 @@ namespace AssimpSample
                 BaseRadius = 20f,
                 Height = 20f
             };
-            
+           
             cyl.CreateInContext(gl);
             cyl.Render(gl, RenderMode.Render);
             Disk disk = new Disk();
@@ -249,7 +311,7 @@ namespace AssimpSample
             disk.OuterRadius = 20f;
             disk.CreateInContext(gl);
             disk.Render(gl, RenderMode.Render);
-
+            
             gl.Translate(-150f, -100f, -20f);
             cyl.Render(gl, RenderMode.Render);
             gl.Translate(0.0f, 0.0f, 20f);
@@ -258,7 +320,6 @@ namespace AssimpSample
 
             
             //iscrtavanje podloge
-            
             gl.Color(0.5f, 0.5f, 0.5f);
             gl.Translate(0.0f, -480f, -1f);
             gl.Begin(OpenGL.GL_QUADS);
@@ -298,6 +359,7 @@ namespace AssimpSample
             wall.Render(gl, RenderMode.Render);
             gl.PopMatrix();
 
+            //crtanje grid mreze
             gl.PushMatrix();
             gl.Translate(-50f, 250f, 0);
             gl.Scale(40f, 30f, 0f);
@@ -316,7 +378,6 @@ namespace AssimpSample
         {
             gl.Viewport(0, m_width / 2, m_width / 2, m_height / 2);
             gl.PushMatrix();
-            //gl.Translate(0.0f, -14.5f, 0.0f);
             gl.MatrixMode(OpenGL.GL_PROJECTION);
             gl.LoadIdentity();
             gl.Ortho2D(-13.0f, 13.0f, -10.0f, 10.0f);
@@ -328,25 +389,24 @@ namespace AssimpSample
             gl.PushMatrix();
             gl.Color(1.0f, 0f, 0.0f);
             gl.Translate(1.5f, -4.0f, 0.0f);
-            //     gl.DrawText3D()
             gl.PushMatrix();
-            gl.DrawText3D("Times New Roman Bold", 10f, 0.0f, 0.0f, "Predmet: Racunarska grafika");
+            gl.DrawText3D("Helvetica Bold", 14f, 0.0f, 0.0f, "Predmet: Racunarska grafika");
             gl.PopMatrix();
             gl.PushMatrix();
             gl.Translate(0f, -1.0f, 0.0f);
-            gl.DrawText3D("Times New Roman Bold", 10f, 0.0f, 0.0f, "Sk.god : 2017/18");
+            gl.DrawText3D("Helvetica Bold", 14f, 0.0f, 0.0f, "Sk.god : 2017/18");
             gl.PopMatrix();
             gl.PushMatrix();
             gl.Translate(0f, -2.0f, 0.0f);
-            gl.DrawText3D("Times New Roman Bold", 10f, 0.0f, 0.0f, "Ima: Ivan");
+            gl.DrawText3D("Helvetica Bold", 14f, 0.0f, 0.0f, "Ime: Ivan");
             gl.PopMatrix();
             gl.PushMatrix();
             gl.Translate(0f, -3.0f, 0.0f);
-            gl.DrawText3D("Times New Roman Bold", 10f, 0.0f, 0.0f, "Prezime: Vukasinovic");
+            gl.DrawText3D("Helvetica Bold", 14f, 0.0f, 0.0f, "Prezime: Vukasinovic");
             gl.PopMatrix();
             gl.PushMatrix();
             gl.Translate(0f, -4.0f, 0.0f);
-            gl.DrawText3D("Times New Roman Bold", 10f, 0.0f, 0.0f, "Sifra zad: 15.2");
+            gl.DrawText3D("Helvetica Bold", 14f, 0.0f, 0.0f, "Sifra zad: 15.2");
             gl.PopMatrix();
 
 
@@ -359,71 +419,46 @@ namespace AssimpSample
             gl.Perspective(45f, 1.0f, 1.0f, 20000f);
             gl.MatrixMode(OpenGL.GL_MODELVIEW);
 
-            // gl.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             gl.PopMatrix();
         }
-
-        private void WriteText(OpenGL gl)
-        {
-            var yTranslate = 0.0f;
-            
-            gl.MatrixMode(OpenGL.GL_PROJECTION);
-            gl.PushMatrix();
-            gl.LoadIdentity();
-            gl.Ortho2D(28,-28,20,-20); //definise projekciju 2D
-
-            gl.MatrixMode(OpenGL.GL_MODELVIEW);
-            gl.LoadIdentity();
-           
-            gl.Translate(-27.0f, 20.0f, 0.0f);
-            gl.Color(1f, 0.0f, 0.0f);
-
-            gl.PushMatrix();
-            gl.Translate(0f, yTranslate -= 1f, 0f);
-            gl.DrawText3D("Helvetica", 12f, 0.0f, 0.0f, "Predmet: Racunarska Grafika");
-            gl.PopMatrix();
-
-            gl.PushMatrix();
-            gl.Translate(0f, yTranslate -= 1f, 0f);
-            gl.DrawText3D("Helvetica", 12f, 0.0f, 0.0f, "Sk. god: 2017/18");
-            gl.PopMatrix();
-
-            gl.PushMatrix();
-            gl.Translate(0f, yTranslate -= 1f, 0f);
-            gl.DrawText3D("Helvetica", 12f, 0.0f, 0.0f, "Ime: Ivan");
-            gl.PopMatrix();
-
-            gl.PushMatrix();
-            gl.Translate(0f, yTranslate -= 1f, 0f);
-            gl.DrawText3D("Helvetica", 12f, 0.0f, 0.0f, "Prezime: Vukasinovic");
-            gl.PopMatrix();
-
-            gl.PushMatrix();
-            gl.Translate(0f, yTranslate -= 1f, 0f);
-            gl.DrawText3D("Arial", 12f, 0.0f, 0.0f, "Sifra zad: 15.2");
-            gl.PopMatrix();
-            gl.Viewport(m_width / 2, 0, m_width / 2, m_height / 2);
-            gl.MatrixMode(OpenGL.GL_PROJECTION);
-            gl.PopMatrix();
-            gl.MatrixMode(OpenGL.GL_MODELVIEW);
-        }
-
-
 
         /// <summary>
         /// Podesava viewport i projekciju za OpenGL kontrolu.
         /// </summary>
         public void Resize(OpenGL gl, int width, int height)
         {
-            m_width = width;
-            m_height = height;
-            gl.Viewport(0, 0, width, height);
+
+            
             gl.MatrixMode(OpenGL.GL_PROJECTION);      // selektuj Projection Matrix
             gl.LoadIdentity();
             gl.Perspective(45f, (double)width / height, 1f, 20000f);
             gl.MatrixMode(OpenGL.GL_MODELVIEW);
+            gl.Viewport(0, 0, m_width, m_height);
             gl.LoadIdentity();                // resetuj ModelView Matrix
         }
+        private void SetupLighting(OpenGL gl)
+        {
+            float[] ac = new float[] { 0.9f, 0.9f, 0.9f, 1.0f };
+            float[] dc = new float[] { 0.9f, 0.9f, 0.0f, 1.0f };
+            float[] position = { -700.0f, 0.0f, 0.0f, 1.0f };
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_POSITION, position);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_AMBIENT, ac);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_DIFFUSE, dc);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_SPOT_CUTOFF, 180.0f);
+
+            //zuto refleksiono
+            float[] yellow = { 1.0f, 1.0f, 0.0f, 1.0f };
+            float[] direction = { 0.0f, -1.0f, 0.0f };
+
+            gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_AMBIENT, yellow);
+            gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_DIFFUSE, yellow);
+            gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_SPOT_DIRECTION, direction);
+            gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_SPOT_CUTOFF, 40.0f);
+
+            gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_POSITION, positionReflector);
+
+        }
+
 
         /// <summary>
         ///  Implementacija IDisposable interfejsa.
