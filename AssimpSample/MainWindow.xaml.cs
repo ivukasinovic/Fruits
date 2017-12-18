@@ -89,12 +89,18 @@ namespace AssimpSample
             switch (e.Key)
             {
                 case Key.F10: this.Close(); break;
-                case Key.W: m_world.RotationX -= 5.0f; break;
-                case Key.S: m_world.RotationX += 5.0f; break;
-                case Key.A: m_world.RotationY -= 5.0f; break;
-                case Key.D: m_world.RotationY += 5.0f; break;
-                case Key.Q: m_world.RotationZ -= 5.0f; break;
-                case Key.E: m_world.RotationZ += 5.0f; break;
+                //case Key.W: m_world.RotationX -= 5.0f; break;
+                //case Key.S: m_world.RotationX += 5.0f; break;
+                //case Key.A: m_world.RotationY -= 5.0f; break;
+                //case Key.D: m_world.RotationY += 5.0f; break;
+                case Key.F4: this.Close(); break;
+                case Key.I: if(m_world.RotationX > -85) m_world.RotationX  -= 5.0f;  break;
+                case Key.K: if (m_world.RotationX < 85) m_world.RotationX += 5.0f; Console.WriteLine(m_world.RotationX); break;
+                case Key.J: if (m_world.RotationY > -85) m_world.RotationY -= 5.0f; Console.WriteLine(m_world.RotationY); break;
+                case Key.L: if (m_world.RotationY < 85) m_world.RotationY += 5.0f; Console.WriteLine(m_world.RotationY); break;
+                case Key.U: m_world.RotationZ -= 5.0f; break;
+                case Key.O: m_world.RotationZ += 5.0f; break;
+                case Key.Y: m_world.SetTimer(); break;
                 case Key.Add: m_world.SceneDistance -= 700.0f; break;
                 case Key.Subtract: m_world.SceneDistance += 700.0f; break;
                 case Key.F2:
@@ -117,6 +123,24 @@ namespace AssimpSample
                     }
                     break;
             }
+        }
+
+        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            m_world.fruitHeight = (float)e.NewValue;
+        }
+
+        private void rotation_value_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                m_world.leftFruitRotation = (float)Convert.ToDouble(rotation_value.Text);
+            }
+            catch(Exception)
+            {
+                rotation_value.Text = "0";
+            }
+
         }
     }
 }

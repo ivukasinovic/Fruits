@@ -4,12 +4,29 @@
         Title="SharpGL WPF Application" Height="350" Width="525" 
         xmlns:sharpGL="clr-namespace:SharpGL.WPF;assembly=SharpGL.WPF" KeyDown="Window_KeyDown">
     <Grid>
-        
-        <!-- The OpenGL control provides a OpenGL drawing surface. -->
-        <sharpGL:OpenGLControl 
+        <DockPanel>
+            <ToolBarTray DockPanel.Dock="Top">
+                <ToolBar>
+                    <Label Content="Ambiental: " />
+                    <TextBox HorizontalAlignment="Left" Width="30"></TextBox>
+                    <TextBox HorizontalAlignment="Left" Width="30"></TextBox>
+                    <TextBox HorizontalAlignment="Left" Width="30"></TextBox>
+                    <Label Content="Rotation V: " />
+
+                    <TextBox x:Name="rotation_value" HorizontalAlignment="Left" Width="40" TextChanged="rotation_value_TextChanged"></TextBox>
+                    <Label Content="Stage Height: " />
+                    <Slider HorizontalAlignment="Left"
+                            Margin="10,5,0,0"
+                            VerticalAlignment="Top"
+                            Width="120"
+                            Maximum="20" ValueChanged="Slider_ValueChanged"/>
+                </ToolBar>
+            </ToolBarTray>
+            <!-- The OpenGL control provides a OpenGL drawing surface. -->
+            <sharpGL:OpenGLControl 
             Name="openGLControl" OpenGLDraw="openGLControl_OpenGLDraw" 
             OpenGLInitialized="openGLControl_OpenGLInitialized" Resized="openGLControl_Resized"
-            DrawFPS="True" RenderContextType="FBO" FrameRate="10"/>
-        
+            DrawFPS="True" RenderContextType="FBO" FrameRate="60" />
+        </DockPanel>
     </Grid>
 </Window>

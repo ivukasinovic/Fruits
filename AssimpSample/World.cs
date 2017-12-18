@@ -16,6 +16,7 @@ using SharpGL.SceneGraph.Core;
 using SharpGL;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Windows.Threading;
 
 namespace AssimpSample
 {
@@ -28,7 +29,6 @@ namespace AssimpSample
     {
         #region Atributi
 
-        
 
         /// <summary>
         ///	 Scena koja se prikazuje.
@@ -67,10 +67,17 @@ namespace AssimpSample
         /// </summary>
         private int m_width;
 
+        public float fruitHeight;
+        public float leftFruitRotation;
         /// <summary>
         ///	 Visina OpenGL kontrole u pikselima.
         /// </summary>
         private int m_height;
+        
+
+        //animacija
+        private float fruitRotation = 0.0f;
+        public DispatcherTimer timer;
 
         #endregion Atributi
 
@@ -97,6 +104,11 @@ namespace AssimpSample
             get { return m_xRotation; }
             set { m_xRotation = value; }
         }
+        //public float FruitHeight
+        //{
+        //    get { return FruitHeight; }
+        //    set { FruitHeight = value; }
+        //}
 
         /// <summary>
         ///	 Ugao rotacije sveta oko Y ose.
@@ -188,7 +200,7 @@ namespace AssimpSample
 
             gl.Enable(OpenGL.GL_LIGHTING);
             gl.Enable(OpenGL.GL_LIGHT0);
-            //gl.Enable(OpenGL.GL_LIGHT1);
+            gl.Enable(OpenGL.GL_LIGHT1);
            
 
 
@@ -198,14 +210,32 @@ namespace AssimpSample
 
 
 
-            FormTexture(gl);
             SetupLighting(gl);
+           // SetTimer();
 
 
             m_scene.LoadScene();
             m_scene.Initialize();
             m_scene2.LoadScene();
             m_scene2.Initialize();
+        }
+
+        public void SetTimer()
+        {
+            timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromMilliseconds(20);
+            timer.Tick += new EventHandler(RotateFruit);
+            timer.Start();
+        }
+
+        private void RotateFruit(object sender, EventArgs e)
+        {
+            fruitRotation += 0.2f;
+            Console.WriteLine(fruitRotation);
+            if (fruitRotation > 10)
+            {
+                timer.Stop();
+            }
         }
 
         private void FormTexture(OpenGL gl)
@@ -249,6 +279,8 @@ namespace AssimpSample
             gl.Enable(OpenGL.GL_DEPTH_TEST);
             gl.Viewport(0, 0, m_width, m_height);
             WriteText2(gl);
+            //ne radi
+            //gl.LookAt(0.0f, 50f, 100f, 0, -1, 0, 0, 1, 0);
 
             gl.PushMatrix();
 
@@ -262,21 +294,22 @@ namespace AssimpSample
             //iscrtavanje 1/2jabuke
             gl.PushMatrix();
             gl.Translate(-180f,-30f, -70f);
-            gl.Rotate(90f, 0f, 0f);
+            gl.Rotate(90f + fruitRotation, 0.0f, 0.0f);
             gl.Scale(20f, 20f, 20f);
             m_scene.Draw();
             gl.PopMatrix();
 
             //iscrtavanje 2/2jabuke
             gl.PushMatrix();
-            gl.Rotate(90f, 180f, 0f);
+            gl.Rotate(90f , 180f - fruitRotation, 0f);
             gl.Translate(-172f, -70f, -173f);
             gl.Scale(20f, 20f, 20f);
             m_scene.Draw();
             gl.PopMatrix();
 
 
-
+            gl.PushMatrix();
+            gl.Rotate(0.0f, 0.0f + leftFruitRotation, 0.0f);
             //iscrtavanje narandza gore
             gl.PushMatrix();
             gl.Rotate(180f, 0f, 0f);
@@ -291,18 +324,18 @@ namespace AssimpSample
             gl.Scale(150f, 150f, 150f);
             m_scene2.Draw();
             gl.PopMatrix();
-
+            gl.PopMatrix();
             //postolja
             gl.PushMatrix();
-            gl.Translate(-5.0f, -100.0f, 0.0f);
+            gl.Translate(-5.0f, -100.0f , 0.0f + fruitHeight);
             gl.Color(0.0f, 0.7f, 0.0f);
             Cylinder cyl = new Cylinder
             {
+                
                 TopRadius = 20f,
                 BaseRadius = 20f,
                 Height = 20f
             };
-           
             cyl.CreateInContext(gl);
             cyl.Render(gl, RenderMode.Render);
             Disk disk = new Disk();
@@ -322,21 +355,32 @@ namespace AssimpSample
             //iscrtavanje podloge
             gl.Color(0.5f, 0.5f, 0.5f);
             gl.Translate(0.0f, -480f, -1f);
+            gl.BindTexture(OpenGL.GL_TEXTURE_2D, m_textures[1]);
             gl.Begin(OpenGL.GL_QUADS);
+            gl.TexCoord(1.0f, 0.0f);
             gl.Vertex(200f, 100f);
+            gl.TexCoord(1.0f, 1.0f);
             gl.Vertex(200f, 480f);
+            gl.TexCoord(0.0f, 1.0f);
             gl.Vertex(-300f, 480f);
+            gl.TexCoord(0.0f, 0.0f);
             gl.Vertex(-300f, 100f);
             gl.End();
 
-            gl.Color(0.0f, 0.0f, 0.7f);
+            //gl.Color(0.0f, 0.0f, 0.7f);
 
             //dole zid
             gl.PushMatrix();
             Cube wall = new Cube();
             gl.Translate(-45.0f, 150.0f, 10.0f);
             gl.Scale(200f, 5f, 10f);
+            gl.Normal(0f, 1f, 0f);
+            gl.TexGen(OpenGL.GL_S, OpenGL.GL_TEXTURE_GEN_MODE, OpenGL.GL_EYE_LINEAR);
+            gl.TexGen(OpenGL.GL_T, OpenGL.GL_TEXTURE_GEN_MODE, OpenGL.GL_EYE_LINEAR);
+            gl.BindTexture(OpenGL.GL_TEXTURE_2D, m_textures[0]);
             wall.Render(gl, RenderMode.Render);
+            //skidanje tekstura
+            //gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
             gl.PopMatrix();
             //gore zid
             gl.PushMatrix();
