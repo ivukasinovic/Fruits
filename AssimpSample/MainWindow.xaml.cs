@@ -100,7 +100,7 @@ namespace AssimpSample
                 case Key.L: if (m_world.RotationY < 85) m_world.RotationY += 5.0f; Console.WriteLine(m_world.RotationY); break;
                 case Key.U: m_world.RotationZ -= 5.0f; break;
                 case Key.O: m_world.RotationZ += 5.0f; break;
-                case Key.Y: m_world.SetTimer(); break;
+                case Key.V: m_world.SetTimer(); break;
                 case Key.Add: m_world.SceneDistance -= 700.0f; break;
                 case Key.Subtract: m_world.SceneDistance += 700.0f; break;
                 case Key.F2:
@@ -127,7 +127,7 @@ namespace AssimpSample
 
         private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            m_world.fruitHeight = (float)e.NewValue;
+            m_world.fruitHeight = (float)e.NewValue*3;
         }
 
         private void rotation_value_TextChanged(object sender, TextChangedEventArgs e)
@@ -141,6 +141,20 @@ namespace AssimpSample
                 rotation_value.Text = "0";
             }
 
+        }
+
+        private void ambientR_slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            m_world.ambientC[0] = (float)e.NewValue;
+            Console.WriteLine("Pomerio 1 za " + m_world.ambientC[0]);
+           
+
+           
+        }
+        private void ambientB_slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            m_world.ambientC[1] = (float)e.NewValue;
+            Console.WriteLine("Pomerio 2 za " + m_world.ambientC[0]);
         }
     }
 }

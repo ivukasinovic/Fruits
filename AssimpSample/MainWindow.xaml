@@ -8,9 +8,22 @@
             <ToolBarTray DockPanel.Dock="Top">
                 <ToolBar>
                     <Label Content="Ambiental: " />
-                    <TextBox HorizontalAlignment="Left" Width="30"></TextBox>
-                    <TextBox HorizontalAlignment="Left" Width="30"></TextBox>
-                    <TextBox HorizontalAlignment="Left" Width="30"></TextBox>
+                    <Slider x:Name="ambientR_slider" HorizontalAlignment="Left"
+                            Margin="10,5,0,0"
+                            VerticalAlignment="Top"
+                            Width="40"
+                            Maximum="1" ValueChanged="ambientR_slider_ValueChanged"/>
+                    <Slider x:Name="ambientG_slider" HorizontalAlignment="Left"
+                            Margin="10,5,0,0"
+                            VerticalAlignment="Top"
+                            Width="40"
+                            Maximum="1"/>
+                    <Slider x:Name="ambientB_slider" HorizontalAlignment="Left"
+                            Margin="10,5,0,0"
+                            VerticalAlignment="Top"
+                            Width="40"
+                            Maximum="1" ValueChanged="ambientB_slider_ValueChanged"/>
+                    
                     <Label Content="Rotation V: " />
 
                     <TextBox x:Name="rotation_value" HorizontalAlignment="Left" Width="40" TextChanged="rotation_value_TextChanged"></TextBox>

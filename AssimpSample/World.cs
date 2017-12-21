@@ -55,8 +55,12 @@ namespace AssimpSample
         private float m_yRotation = 0.0f;
 
         private float m_zRotation = 0.0f;
-        float[] positionReflector = { 0.0f, 2700.0f, 0.0f, 1.0f };
+        
 
+        //Ambientalno svetlo [R,G,B]
+        public float[] ambientC = { 1.0f, 0.0f, 1.0f};
+
+        //private float ambientRG
         /// <summary>
         ///	 Udaljenost scene od kamere.
         /// </summary>
@@ -73,7 +77,6 @@ namespace AssimpSample
         ///	 Visina OpenGL kontrole u pikselima.
         /// </summary>
         private int m_height;
-        
 
         //animacija
         private float fruitRotation = 0.0f;
@@ -86,6 +89,7 @@ namespace AssimpSample
         /// <summary>
         ///	 Scena koja se prikazuje.
         /// </summary>
+        /// 
         public AssimpScene Scene
         {
             get { return m_scene; }
@@ -109,6 +113,7 @@ namespace AssimpSample
         //    get { return FruitHeight; }
         //    set { FruitHeight = value; }
         //}
+
 
         /// <summary>
         ///	 Ugao rotacije sveta oko Y ose.
@@ -166,6 +171,9 @@ namespace AssimpSample
             this.m_width = width;
             this.m_height = height;
             m_textures = new uint[2];
+            ambientC[0] = 1.0f;
+            ambientC[1] = 1.0f;
+            ambientC[2] = 0.0f;
         }
 
         /// <summary>
@@ -191,28 +199,12 @@ namespace AssimpSample
             gl.ShadeModel(OpenGL.GL_FLAT);
             gl.Enable(OpenGL.GL_DEPTH_TEST);
             gl.Enable(OpenGL.GL_CULL_FACE);
-
-            gl.Enable(OpenGL.GL_COLOR_MATERIAL);
-            gl.ColorMaterial(OpenGL.GL_FRONT, OpenGL.GL_AMBIENT_AND_DIFFUSE);
-            gl.Enable(OpenGL.GL_NORMALIZE);
-
-            FormTexture(gl);
-
-            gl.Enable(OpenGL.GL_LIGHTING);
-            gl.Enable(OpenGL.GL_LIGHT0);
-            gl.Enable(OpenGL.GL_LIGHT1);
-           
-
-
-
-            gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_WRAP_S, OpenGL.GL_REPEAT);
-            gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_WRAP_T, OpenGL.GL_REPEAT);
-
-
+            
+            
 
             SetupLighting(gl);
-           // SetTimer();
 
+            FormTexture(gl);
 
             m_scene.LoadScene();
             m_scene.Initialize();
@@ -231,7 +223,6 @@ namespace AssimpSample
         private void RotateFruit(object sender, EventArgs e)
         {
             fruitRotation += 0.2f;
-            Console.WriteLine(fruitRotation);
             if (fruitRotation > 10)
             {
                 timer.Stop();
@@ -258,6 +249,7 @@ namespace AssimpSample
                                                       PixelFormat.Format32bppArgb);
 
                 gl.Build2DMipmaps(OpenGL.GL_TEXTURE_2D, (int)OpenGL.GL_RGBA8, image.Width, image.Height, OpenGL.GL_BGRA, OpenGL.GL_UNSIGNED_BYTE, imageData.Scan0);
+                //filtriranje teksture koje se primenjuje u slucaju da se tekstura mora smanjiti  da bi bila pridruzena obj je LINEAR
                 gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MIN_FILTER, OpenGL.GL_LINEAR);		// Linear Filtering
                 gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MAG_FILTER, OpenGL.GL_LINEAR);		// Linear Filtering
 
@@ -267,6 +259,7 @@ namespace AssimpSample
                 image.UnlockBits(imageData);
                 image.Dispose();
             }
+
         }
 
         /// <summary>
@@ -274,16 +267,17 @@ namespace AssimpSample
         /// </summary>
         public void Draw(OpenGL gl)
         {
-            
+           // gl.LookAt(1.0f, 0.0f, -5.0f, -1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 0.0f);
             gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
             gl.Enable(OpenGL.GL_DEPTH_TEST);
             gl.Viewport(0, 0, m_width, m_height);
+           
             WriteText2(gl);
             //ne radi
-            //gl.LookAt(0.0f, 50f, 100f, 0, -1, 0, 0, 1, 0);
+            //gl.LookAt(0.0f, 5f, 100f, 0, -1, 0, 0, 1, 0);
 
             gl.PushMatrix();
-
+            
             gl.Translate(0.0f, 0.0f, -m_sceneDistance);
             gl.Scale(10f, 10f, 10f);
             gl.Rotate(m_xRotation, 1.0f, 0.0f, 0.0f); 
@@ -293,7 +287,7 @@ namespace AssimpSample
 
             //iscrtavanje 1/2jabuke
             gl.PushMatrix();
-            gl.Translate(-180f,-30f, -70f);
+            gl.Translate(-180f, -30f, -70f + fruitHeight);
             gl.Rotate(90f + fruitRotation, 0.0f, 0.0f);
             gl.Scale(20f, 20f, 20f);
             m_scene.Draw();
@@ -302,7 +296,7 @@ namespace AssimpSample
             //iscrtavanje 2/2jabuke
             gl.PushMatrix();
             gl.Rotate(90f , 180f - fruitRotation, 0f);
-            gl.Translate(-172f, -70f, -173f);
+            gl.Translate(-172f, -70f + fruitHeight, -173f );
             gl.Scale(20f, 20f, 20f);
             m_scene.Draw();
             gl.PopMatrix();
@@ -313,59 +307,52 @@ namespace AssimpSample
             //iscrtavanje narandza gore
             gl.PushMatrix();
             gl.Rotate(180f, 0f, 0f);
-            gl.Translate(-125f, 137f,-50f);
+            gl.Translate(-125f, 137f,-50f - fruitHeight);
             gl.Scale(150f, 150f, 150f);
             m_scene2.Draw();
             gl.PopMatrix();
             //iscrtavanje narandza dole
             gl.PushMatrix();
             gl.Rotate(0f, 0f, 0f);
-            gl.Translate(-125f, -258f, 12f);
+            gl.Translate(-125f, -258f, 12f + fruitHeight);
             gl.Scale(150f, 150f, 150f);
             m_scene2.Draw();
             gl.PopMatrix();
             gl.PopMatrix();
             //postolja
             gl.PushMatrix();
-            gl.Translate(-5.0f, -100.0f , 0.0f + fruitHeight);
+            gl.Translate(-5.0f, -100.0f , 0.0f );
             gl.Color(0.0f, 0.7f, 0.0f);
             Cylinder cyl = new Cylinder
             {
                 
                 TopRadius = 20f,
                 BaseRadius = 20f,
-                Height = 20f
+                Height = 20f+ fruitHeight
             };
             cyl.CreateInContext(gl);
             cyl.Render(gl, RenderMode.Render);
             Disk disk = new Disk();
-            gl.Translate(0.0f, 0.0f, 20f);
+            
             disk.InnerRadius = 0f;
             disk.OuterRadius = 20f;
             disk.CreateInContext(gl);
+
+            gl.Translate(0.0f, 0.0f, 20f +fruitHeight);
             disk.Render(gl, RenderMode.Render);
             
-            gl.Translate(-150f, -100f, -20f);
+            gl.Translate(-150f, -100f, -20f -fruitHeight);
             cyl.Render(gl, RenderMode.Render);
-            gl.Translate(0.0f, 0.0f, 20f);
+            gl.Translate(0.0f, 0.0f, 20f + fruitHeight );
             disk.Render(gl, RenderMode.Render);
             gl.PopMatrix();
 
-            
+
             //iscrtavanje podloge
-            gl.Color(0.5f, 0.5f, 0.5f);
-            gl.Translate(0.0f, -480f, -1f);
-            gl.BindTexture(OpenGL.GL_TEXTURE_2D, m_textures[1]);
-            gl.Begin(OpenGL.GL_QUADS);
-            gl.TexCoord(1.0f, 0.0f);
-            gl.Vertex(200f, 100f);
-            gl.TexCoord(1.0f, 1.0f);
-            gl.Vertex(200f, 480f);
-            gl.TexCoord(0.0f, 1.0f);
-            gl.Vertex(-300f, 480f);
-            gl.TexCoord(0.0f, 0.0f);
-            gl.Vertex(-300f, 100f);
-            gl.End();
+
+            drawFloor(gl);
+           
+
 
             //gl.Color(0.0f, 0.0f, 0.7f);
 
@@ -375,8 +362,8 @@ namespace AssimpSample
             gl.Translate(-45.0f, 150.0f, 10.0f);
             gl.Scale(200f, 5f, 10f);
             gl.Normal(0f, 1f, 0f);
-            gl.TexGen(OpenGL.GL_S, OpenGL.GL_TEXTURE_GEN_MODE, OpenGL.GL_EYE_LINEAR);
-            gl.TexGen(OpenGL.GL_T, OpenGL.GL_TEXTURE_GEN_MODE, OpenGL.GL_EYE_LINEAR);
+           // gl.TexGen(OpenGL.GL_S, OpenGL.GL_TEXTURE_GEN_MODE, OpenGL.GL_EYE_LINEAR);
+            //gl.TexGen(OpenGL.GL_T, OpenGL.GL_TEXTURE_GEN_MODE, OpenGL.GL_EYE_LINEAR);
             gl.BindTexture(OpenGL.GL_TEXTURE_2D, m_textures[0]);
             wall.Render(gl, RenderMode.Render);
             //skidanje tekstura
@@ -417,6 +404,44 @@ namespace AssimpSample
             // Oznaci kraj iscrtavanja
             gl.Flush();
         }
+
+        private void drawFloor(OpenGL gl)
+        {
+            gl.Color(0.5f, 0.5f, 0.5f);
+            gl.Translate(0.0f, -480f, -1f);
+            for (float x = -300.0f; x <= 100.0f; x += 100.0f)
+            {
+                gl.BindTexture(OpenGL.GL_TEXTURE_2D, m_textures[1]);
+                gl.Begin(OpenGL.GL_QUADS);
+                gl.TexCoord(0.0f, 1.0f);
+                gl.TexCoord(1.0f, 0.0f);
+                gl.Vertex(x + 100.0f, 100f);
+                gl.TexCoord(1.0f, 1.0f);
+                gl.Vertex(x+100.0f, 480f);
+                gl.TexCoord(0.0f, 1.0f);
+                gl.Vertex(x, 480f);
+                gl.TexCoord(0.0f, 0.0f);
+                gl.Vertex(x, 100f);
+
+                gl.End();
+            }
+
+
+
+                //gl.Color(0.5f, 0.5f, 0.5f);
+                //gl.Translate(0.0f, -480f, -1f);
+                //gl.BindTexture(OpenGL.GL_TEXTURE_2D, m_textures[1]);
+                //gl.Begin(OpenGL.GL_QUADS);
+                //gl.TexCoord(1.0f, 0.0f);
+                //gl.Vertex(200f, 100f);
+                //gl.TexCoord(1.0f, 1.0f);
+                //gl.Vertex(200f, 480f);
+                //gl.TexCoord(0.0f, 1.0f);
+                //gl.Vertex(-300f, 480f);
+                //gl.TexCoord(0.0f, 0.0f);
+                //gl.Vertex(-300f, 100f);
+                //gl.End();
+            }
 
         private void WriteText2(OpenGL gl)
         {
@@ -480,26 +505,40 @@ namespace AssimpSample
             gl.Viewport(0, 0, m_width, m_height);
             gl.LoadIdentity();                // resetuj ModelView Matrix
         }
-        private void SetupLighting(OpenGL gl)
+        public void SetupLighting(OpenGL gl)
         {
-            float[] ac = new float[] { 0.9f, 0.9f, 0.9f, 1.0f };
-            float[] dc = new float[] { 0.9f, 0.9f, 0.0f, 1.0f };
-            float[] position = { -700.0f, 0.0f, 0.0f, 1.0f };
+            gl.Enable(OpenGL.GL_COLOR_MATERIAL);
+            gl.ColorMaterial(OpenGL.GL_FRONT, OpenGL.GL_AMBIENT_AND_DIFFUSE);
+
+
+            float[] globalAmbient = new float[] { 0.2f, 0.2f, 0.2f, 1.0f };
+            gl.Light(OpenGL.GL_LIGHT0,OpenGL.GL_AMBIENT, globalAmbient);
+
+            float[] ac = new float[] { 0.6f, 0.6f, 0.6f, 1.0f };
+            float[] dc = new float[] { 1.0f, 1.0f, 0.0f, 1.0f };
+            float[] position = { -700.0f, 700.0f, 0.0f, 1.0f };
             gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_POSITION, position);
             gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_AMBIENT, ac);
             gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_DIFFUSE, dc);
             gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_SPOT_CUTOFF, 180.0f);
 
             //zuto refleksiono
-            float[] yellow = { 1.0f, 1.0f, 0.0f, 1.0f };
-            float[] direction = { 0.0f, -1.0f, 0.0f };
+            float[] yellowAc = { ambientC[0], ambientC[1], ambientC[2], 1.0f };
+            float[] reflectDiff = { 1.0f, 1.0f, 0.0f, 1.0f };
+            float[] direction = { 0.0f, 0.0f, -1.0f };
 
-            gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_AMBIENT, yellow);
-            gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_DIFFUSE, yellow);
+            gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_AMBIENT, yellowAc);
+            gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_DIFFUSE, reflectDiff);
             gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_SPOT_DIRECTION, direction);
             gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_SPOT_CUTOFF, 40.0f);
-
+            float[] positionReflector = { 0.0f, 0.0f, 0.0f, 1.0f };
             gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_POSITION, positionReflector);
+
+
+            gl.Enable(OpenGL.GL_LIGHTING);
+            gl.Enable(OpenGL.GL_LIGHT0);
+            gl.Enable(OpenGL.GL_LIGHT1);
+            gl.Enable(OpenGL.GL_NORMALIZE);
 
         }
 
