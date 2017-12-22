@@ -44,6 +44,10 @@ namespace AssimpSample
         /// </summary>
         private string[] m_textureFiles = { "..//..//images//brick.jpg", "..//..//images//parquet.jpg" };
 
+        private float ambient0;
+        private float ambient1;
+        private float ambient2;
+
         /// <summary>
         ///	 Ugao rotacije sveta oko X ose.
         /// </summary>
@@ -56,9 +60,6 @@ namespace AssimpSample
 
         private float m_zRotation = 0.0f;
         
-
-        //Ambientalno svetlo [R,G,B]
-        public float[] ambientC = { 1.0f, 0.0f, 1.0f};
 
         //private float ambientRG
         /// <summary>
@@ -77,6 +78,22 @@ namespace AssimpSample
         ///	 Visina OpenGL kontrole u pikselima.
         /// </summary>
         private int m_height;
+
+        public float Ambient0
+        {
+            get { return ambient0; }
+            set { ambient0 = value; }
+        }
+        public float Ambient1
+        {
+            get { return ambient1; }
+            set { ambient1 = value; }
+        }
+        public float Ambient2
+        {
+            get { return ambient2; }
+            set { ambient2 = value; }
+        }
 
         //animacija
         private float fruitRotation = 0.0f;
@@ -108,12 +125,6 @@ namespace AssimpSample
             get { return m_xRotation; }
             set { m_xRotation = value; }
         }
-        //public float FruitHeight
-        //{
-        //    get { return FruitHeight; }
-        //    set { FruitHeight = value; }
-        //}
-
 
         /// <summary>
         ///	 Ugao rotacije sveta oko Y ose.
@@ -171,9 +182,11 @@ namespace AssimpSample
             this.m_width = width;
             this.m_height = height;
             m_textures = new uint[2];
-            ambientC[0] = 1.0f;
-            ambientC[1] = 1.0f;
-            ambientC[2] = 0.0f;
+
+            ambient0 = 0.8f;
+            ambient1 = 0.8f;
+            ambient2 = 0.0f;
+
         }
 
         /// <summary>
@@ -277,7 +290,8 @@ namespace AssimpSample
             //gl.LookAt(0.0f, 5f, 100f, 0, -1, 0, 0, 1, 0);
 
             gl.PushMatrix();
-            
+            SetupLighting(gl);
+            gl.LookAt(0.0f, 0f, 100f, 0, -1, 0, 0, 1, 0);
             gl.Translate(0.0f, 0.0f, -m_sceneDistance);
             gl.Scale(10f, 10f, 10f);
             gl.Rotate(m_xRotation, 1.0f, 0.0f, 0.0f); 
@@ -409,15 +423,15 @@ namespace AssimpSample
         {
             gl.Color(0.5f, 0.5f, 0.5f);
             gl.Translate(0.0f, -480f, -1f);
-            for (float x = -300.0f; x <= 100.0f; x += 100.0f)
+            for (float x = -300.0f; x < 100.0f; x += 250.0f)
             {
                 gl.BindTexture(OpenGL.GL_TEXTURE_2D, m_textures[1]);
                 gl.Begin(OpenGL.GL_QUADS);
                 gl.TexCoord(0.0f, 1.0f);
                 gl.TexCoord(1.0f, 0.0f);
-                gl.Vertex(x + 100.0f, 100f);
+                gl.Vertex(x + 250.0f, 100f);
                 gl.TexCoord(1.0f, 1.0f);
-                gl.Vertex(x+100.0f, 480f);
+                gl.Vertex(x+250.0f, 480f);
                 gl.TexCoord(0.0f, 1.0f);
                 gl.Vertex(x, 480f);
                 gl.TexCoord(0.0f, 0.0f);
@@ -426,21 +440,6 @@ namespace AssimpSample
                 gl.End();
             }
 
-
-
-                //gl.Color(0.5f, 0.5f, 0.5f);
-                //gl.Translate(0.0f, -480f, -1f);
-                //gl.BindTexture(OpenGL.GL_TEXTURE_2D, m_textures[1]);
-                //gl.Begin(OpenGL.GL_QUADS);
-                //gl.TexCoord(1.0f, 0.0f);
-                //gl.Vertex(200f, 100f);
-                //gl.TexCoord(1.0f, 1.0f);
-                //gl.Vertex(200f, 480f);
-                //gl.TexCoord(0.0f, 1.0f);
-                //gl.Vertex(-300f, 480f);
-                //gl.TexCoord(0.0f, 0.0f);
-                //gl.Vertex(-300f, 100f);
-                //gl.End();
             }
 
         private void WriteText2(OpenGL gl)
@@ -510,7 +509,7 @@ namespace AssimpSample
             gl.Enable(OpenGL.GL_COLOR_MATERIAL);
             gl.ColorMaterial(OpenGL.GL_FRONT, OpenGL.GL_AMBIENT_AND_DIFFUSE);
 
-
+            
             float[] globalAmbient = new float[] { 0.2f, 0.2f, 0.2f, 1.0f };
             gl.Light(OpenGL.GL_LIGHT0,OpenGL.GL_AMBIENT, globalAmbient);
 
@@ -522,13 +521,15 @@ namespace AssimpSample
             gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_DIFFUSE, dc);
             gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_SPOT_CUTOFF, 180.0f);
 
-            //zuto refleksiono
-            float[] yellowAc = { ambientC[0], ambientC[1], ambientC[2], 1.0f };
+            //zuto refleksiono (OVDE PODESI)
+            float[] yellowAc = { ambient0, ambient1, ambient2, 1.0f };
             float[] reflectDiff = { 1.0f, 1.0f, 0.0f, 1.0f };
             float[] direction = { 0.0f, 0.0f, -1.0f };
+            float[] light0specular_yellow = new float[] { 0.9f, 0.9f, 0.0f, 1.0f };
 
             gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_AMBIENT, yellowAc);
             gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_DIFFUSE, reflectDiff);
+            gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_SPECULAR, light0specular_yellow);
             gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_SPOT_DIRECTION, direction);
             gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_SPOT_CUTOFF, 40.0f);
             float[] positionReflector = { 0.0f, 0.0f, 0.0f, 1.0f };

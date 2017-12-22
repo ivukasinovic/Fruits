@@ -43,7 +43,9 @@ namespace AssimpSample
             // Kreiranje OpenGL sveta
             try
             {
-                m_world = new World(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "3D Models\\Fruits"), "pumpkin.3DS","orangeHalf2.3ds", (int)openGLControl.Width, (int)openGLControl.Height, openGLControl.OpenGL);
+                m_world = new World(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), 
+                    "3D Models\\Fruits"), "pumpkin.3DS","orangeHalf2.3ds",
+                    (int)openGLControl.Width, (int)openGLControl.Height, openGLControl.OpenGL);
             }
             catch (Exception e)
             {
@@ -145,16 +147,31 @@ namespace AssimpSample
 
         private void ambientR_slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            m_world.ambientC[0] = (float)e.NewValue;
-            Console.WriteLine("Pomerio 1 za " + m_world.ambientC[0]);
-           
-
+            // AMBIENTALNO CRVENO
+            try
+            {
+                m_world.Ambient0 = (float)Convert.ToDouble(ambientR_slider.Value);
+            } catch (Exception) { }
            
         }
         private void ambientB_slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            m_world.ambientC[1] = (float)e.NewValue;
-            Console.WriteLine("Pomerio 2 za " + m_world.ambientC[0]);
+            // AMBIENTALNO PLAVO
+            try
+            {
+                m_world.Ambient1 = (float)Convert.ToDouble(ambientB_slider.Value);
+            }
+            catch (Exception) { }
+        }
+
+        private void ambientG_slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            // AMBIENTALNO ZELENO
+            try
+            {
+                m_world.Ambient2 = (float)Convert.ToDouble(ambientG_slider.Value);
+            }
+            catch (Exception) { }
         }
     }
 }

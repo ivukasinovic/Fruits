@@ -12,16 +12,19 @@
                             Margin="10,5,0,0"
                             VerticalAlignment="Top"
                             Width="40"
+                            Value =" 0.8"
                             Maximum="1" ValueChanged="ambientR_slider_ValueChanged"/>
                     <Slider x:Name="ambientG_slider" HorizontalAlignment="Left"
                             Margin="10,5,0,0"
+                           Value =" 0.8"
                             VerticalAlignment="Top"
                             Width="40"
-                            Maximum="1"/>
+                            Maximum="1" ValueChanged="ambientG_slider_ValueChanged"/>
                     <Slider x:Name="ambientB_slider" HorizontalAlignment="Left"
                             Margin="10,5,0,0"
                             VerticalAlignment="Top"
                             Width="40"
+                            Value =" 0.0"
                             Maximum="1" ValueChanged="ambientB_slider_ValueChanged"/>
                     
                     <Label Content="Rotation V: " />
