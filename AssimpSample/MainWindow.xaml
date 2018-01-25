@@ -8,18 +8,21 @@
             <ToolBarTray DockPanel.Dock="Top">
                 <ToolBar>
                     <Label Content="Ambiental: " />
+                    <Label Content="R"></Label>
                     <Slider x:Name="ambientR_slider" HorizontalAlignment="Left"
                             Margin="10,5,0,0"
                             VerticalAlignment="Top"
                             Width="40"
                             Value =" 0.8"
                             Maximum="1" ValueChanged="ambientR_slider_ValueChanged"/>
+                    <Label Content="G"></Label>
                     <Slider x:Name="ambientG_slider" HorizontalAlignment="Left"
                             Margin="10,5,0,0"
                            Value =" 0.8"
                             VerticalAlignment="Top"
                             Width="40"
                             Maximum="1" ValueChanged="ambientG_slider_ValueChanged"/>
+                    <Label Content="B"></Label>
                     <Slider x:Name="ambientB_slider" HorizontalAlignment="Left"
                             Margin="10,5,0,0"
                             VerticalAlignment="Top"

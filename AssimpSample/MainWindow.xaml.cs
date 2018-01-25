@@ -44,7 +44,7 @@ namespace AssimpSample
             try
             {
                 m_world = new World(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), 
-                    "3D Models\\Fruits"), "pumpkin.3DS","orangeHalf2.3ds",
+                    "3D Models\\Fruits"), "orangeHalf2.3ds","orangeHalf2.3ds",
                     (int)openGLControl.Width, (int)openGLControl.Height, openGLControl.OpenGL);
             }
             catch (Exception e)
@@ -159,7 +159,7 @@ namespace AssimpSample
             // AMBIENTALNO PLAVO
             try
             {
-                m_world.Ambient1 = (float)Convert.ToDouble(ambientB_slider.Value);
+                m_world.Ambient2 = (float)Convert.ToDouble(ambientB_slider.Value);
             }
             catch (Exception) { }
         }
@@ -169,7 +169,7 @@ namespace AssimpSample
             // AMBIENTALNO ZELENO
             try
             {
-                m_world.Ambient2 = (float)Convert.ToDouble(ambientG_slider.Value);
+                m_world.Ambient1 = (float)Convert.ToDouble(ambientG_slider.Value);
             }
             catch (Exception) { }
         }
