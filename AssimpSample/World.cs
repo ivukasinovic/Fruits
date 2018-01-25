@@ -58,7 +58,7 @@ namespace AssimpSample
         /// </summary>
         private float m_yRotation = 0.0f;
 
-        private float m_zRotation = 0.0f;
+        private float m_zRotation = 90.0f;
         
 
         //private float ambientRG
@@ -284,19 +284,26 @@ namespace AssimpSample
             gl.Enable(OpenGL.GL_DEPTH_TEST);
             gl.Viewport(0, 0, m_width, m_height);
             gl.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-            
+
+            gl.Disable(OpenGL.GL_LIGHTING);
+            gl.Disable(OpenGL.GL_TEXTURE_2D);
             WriteText2(gl);
+            gl.Enable(OpenGL.GL_TEXTURE_2D);
+            gl.Enable(OpenGL.GL_LIGHTING);
             
             gl.PushMatrix();
-            gl.LookAt(0.0f, 0f, 100f, 0, -1, 0, 0, 1, 0);
+            
+            gl.LookAt(0.0f, 0f, 100.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f);
             gl.Translate(0.0f, 0.0f, -m_sceneDistance);
+          
             gl.Scale(10f, 10f, 10f);
             gl.Rotate(m_xRotation, 1.0f, 0.0f, 0.0f); 
             gl.Rotate(m_yRotation, 0.0f, 1.0f, 0.0f);
             gl.Rotate(m_zRotation, 0.0f, 0.0f, 1.0f);
             
             gl.Translate(40f, 200f, 0.0f);
-            SetupLighting1(gl);
+            //reflektor
+             SetupLighting1(gl);
 
 
             //iscrtavanje 1/2jabuke
@@ -304,11 +311,14 @@ namespace AssimpSample
             gl.Color(0.0f, 0.1f, 0.0f, 1.0f);
             gl.TexEnv(OpenGL.GL_TEXTURE_ENV, OpenGL.GL_TEXTURE_ENV_MODE, OpenGL.GL_ADD);
             gl.PushMatrix();
+            gl.Rotate(0.0f + leftFruitRotation, 0.0f , 0.0f);
+            gl.PushMatrix();
             gl.Translate(35, -80f, -40f + fruitHeight);
             gl.Rotate(90f - fruitRotation, 0.0f, 0.0f);
             gl.Scale(200f, 200f, 200f);
             m_scene.Draw();
             gl.PopMatrix();
+           
 
             //iscrtavanje 2/2jabuke
             gl.PushMatrix();
@@ -317,9 +327,10 @@ namespace AssimpSample
             gl.Scale(200f, 200f, 200f);
             m_scene.Draw();
             gl.PopMatrix();
+            gl.PopMatrix();
 
             gl.PushMatrix();
-            gl.Rotate(0.0f, 0.0f + leftFruitRotation, 0.0f);
+           // gl.Rotate(0.0f, 0.0f + leftFruitRotation, 0.0f);
             //iscrtavanje narandza gore
             gl.PushMatrix();
             
@@ -525,16 +536,16 @@ namespace AssimpSample
         public void SetupLighting0(OpenGL gl)
         {
             gl.Enable(OpenGL.GL_COLOR_MATERIAL);
-            gl.ColorMaterial(OpenGL.GL_FRONT, OpenGL.GL_AMBIENT_AND_DIFFUSE);
-
+            gl.ColorMaterial(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_AMBIENT_AND_DIFFUSE);
+            
             
             float[] globalAmbient = new float[] { 0.2f, 0.2f, 0.2f, 1.0f };
             gl.Light(OpenGL.GL_LIGHT0,OpenGL.GL_AMBIENT, globalAmbient);
 
-            float[] ac = new float[] { 0.6f, 0.6f, 0.6f, 1.0f };
-            float[] dc = new float[] { 0.1f, 0.1f, 0.0f, 1.0f };
-            float[] sc = new float[] { 0.2f, 0.2f, 0.2f, 1.0f };
-            float[] position = { -300.0f, -300.0f, 500.0f, 1.0f };
+            float[] ac = new float[] { 0.7f, 0.7f, 0.0f, 1.0f };
+            float[] dc = new float[] { 0.7f, 0.7f, 0.0f, 1.0f };
+            float[] sc = new float[] { 0.2f, 0.2f, 0.0f, 1.0f };
+            float[] position = { -300.0f, 300.0f, m_sceneDistance+100, 1.0f };
             gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_POSITION, position);
             gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_AMBIENT, ac);
             gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_DIFFUSE, dc);
@@ -547,6 +558,7 @@ namespace AssimpSample
             gl.Enable(OpenGL.GL_LIGHTING);
             gl.Enable(OpenGL.GL_LIGHT0);
             gl.Enable(OpenGL.GL_NORMALIZE);
+           // gl.Rotate(0.0f, 90.0f, 0.0f);
 
         }
         public void SetupLighting1(OpenGL gl)
